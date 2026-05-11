@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saber Pro 2025 · UDI · Depto. Ciencias Básicas y Humanas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --udi-blue:   #1B4F8C;
+  --udi-gold:   #C8892A;
+  --udi-blue-d: #143C6B;
+  --udi-gold-d: #A06D1C;
+  --udi-blue-l: #EBF0F8;
+  --udi-gold-l: #FDF3E5;
+  --ink:        #1A1917;
+  --ink2:       #3D3C3A;
+  --ink3:       #888780;
+  --line:       #E4E2DC;
+  --bg:         #F7F6F3;
+  --white:      #FFFFFF;
+  --green:      #0F6E56;
+  --chart-blue: #5B9BD5;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+
+/* HEADER */
+.site-header {
+  background: var(--udi-blue); padding: 0 48px;
+  display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 24px;
+}
+.logo-svg { height: 44px; width: auto; flex-shrink: 0; }
+.header-divider { width: 1px; height: 32px; background: rgba(255,255,255,0.25); }
+.header-dept { font-size: 11px; font-weight: 500; color: var(--udi-gold); text-transform: uppercase; letter-spacing: .1em; }
+.header-title { font-size: 15px; font-weight: 500; color: #fff; line-height: 1.25; }
+.badge-rank { background: var(--udi-gold); color: #fff; font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 100px; white-space: nowrap; }
+.print-btn { background: transparent; color: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.3); padding: 6px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.print-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* NAV TABS */
+.nav-bar {
+  background: var(--white); border-bottom: 1px solid var(--line);
+  padding: 0 48px; display: flex; align-items: center; gap: 2px;
+  overflow-x: auto; height: 54px; position: sticky; top: 0; z-index: 100;
+}
+.nav-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 400; color: var(--ink3);
+  cursor: pointer; border: none; background: transparent;
+  font-family: 'DM Sans', sans-serif; transition: all .18s;
+  white-space: nowrap; flex-shrink: 0; height: 38px;
+}
+.nav-pill:hover { background: var(--udi-blue-l); color: var(--udi-blue); }
+.nav-pill.active { background: var(--udi-blue); color: #fff; font-weight: 500; }
+.nav-pill.gold-pill { border: 1px solid var(--udi-gold); color: var(--udi-gold-d); }
+.nav-pill.gold-pill.active { background: var(--udi-gold); color: #fff; border-color: var(--udi-gold); }
+.pill-num {
+  background: var(--udi-blue-l); color: var(--udi-blue);
+  border-radius: 100px; font-size: 10px; padding: 1px 7px; font-weight: 500;
+}
+.nav-pill.active .pill-num { background: rgba(255,255,255,0.25); color: #fff; }
+.nav-pill.gold-pill .pill-num { background: var(--udi-gold-l); color: var(--udi-gold-d); }
+.nav-pill.gold-pill.active .pill-num { background: rgba(255,255,255,0.3); color: #fff; }
+
+/* SECTIONS (tab panels) */
+.main { max-width: 1120px; margin: 0 auto; padding: 40px 32px 64px; }
+.tab-panel { display: none; }
+.tab-panel.visible { display: block; }
+
+.section-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+.section-num {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--udi-blue);
+  color: #fff; font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.section-num.gold { background: var(--udi-gold); }
+.section-title-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: var(--ink); }
+.section-desc { font-size: 13px; color: var(--ink3); margin-top: 3px; line-height: 1.5; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.kpi-card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: 10px; padding: 20px 22px; position: relative; overflow: hidden; transition: transform .15s;
+}
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background: var(--line); }
+.kpi-card.hl::after { background: var(--udi-gold); }
+.kpi-label { font-size: 11px; color: var(--ink3); text-transform: uppercase; letter-spacing:.07em; margin-bottom:8px; }
+.kpi-val { font-family: 'Playfair Display', serif; font-size: 38px; line-height: 1; color: var(--ink); }
+.kpi-val.g { color: var(--green); }
+.kpi-val.b { color: var(--udi-blue); }
+.kpi-sub { font-size: 12px; color: var(--ink3); margin-top: 6px; line-height: 1.4; }
+
+/* CHART CARDS */
+.charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.chart-card { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 26px; }
+.chart-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--ink); margin-bottom: 4px; }
+.chart-desc { font-size: 13px; color: var(--ink3); margin-bottom: 16px; line-height: 1.5; }
+.chart-legend { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+.chart-legend span { font-size: 12px; color: var(--ink3); display: flex; align-items: center; gap: 5px; }
+.leg-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.leg-sq   { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.leg-line { width: 18px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+.leg-dash { width: 18px; height: 0; border-top: 2px dashed #888780; flex-shrink: 0; }
+
+/* INSIGHT */
+.insight {
+  margin-top: 16px; background: var(--udi-blue-l);
+  border-left: 3px solid var(--udi-blue); border-radius: 0 6px 6px 0;
+  padding: 11px 15px; font-size: 13px; color: var(--ink2); line-height: 1.6;
+}
+.insight strong { color: var(--udi-blue); font-weight: 500; }
+
+/* ACELERACIÓN highlight strip */
+.accel-strip {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px;
+}
+.accel-card {
+  background: var(--white); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px 20px; text-align: center;
+}
+.accel-card.winner { background: var(--udi-blue-l); border-color: #C5D5EC; }
+.accel-period { font-size: 11px; color: var(--ink3); text-transform: uppercase; letter-spacing:.07em; margin-bottom:6px; }
+.accel-val { font-family: 'Playfair Display', serif; font-size: 32px; line-height:1; }
+.accel-val.up { color: var(--green); }
+.accel-val.big { color: var(--udi-blue); }
+.accel-note { font-size: 11px; color: var(--ink3); margin-top: 5px; }
+.accel-arrow { font-size: 22px; display:flex; align-items:center; justify-content:center; color: var(--udi-blue); margin: 6px 0 2px; }
+
+/* LOGRO BANNER */
+.logro-banner {
+  background: var(--udi-blue); border-radius: 14px; padding: 48px 56px;
+  display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center;
+}
+.logro-label { font-size: 11px; font-weight: 500; color: var(--udi-gold); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
+.logro-heading { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #fff; line-height: 1.35; margin-bottom: 16px; }
+.logro-body { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; max-width: 580px; }
+.logro-stats { display: flex; flex-direction: column; gap: 16px; min-width: 160px; }
+.logro-stat { text-align: center; }
+.logro-stat-val { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; color: var(--udi-gold); line-height: 1; }
+.logro-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+.logro-divider { width: 1px; background: rgba(255,255,255,0.15); height: 60px; align-self: center; }
+
+/* FOOTER */
+.site-footer { border-top: 1px solid var(--line); padding: 20px 48px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink3); }
+
+@media print {
+  .nav-bar, .print-btn { display: none; }
+  .tab-panel { display: block !important; }
+  .logro-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+@media (max-width: 820px) {
+  .site-header { padding: 0 16px; height: auto; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .nav-bar { padding: 0 16px; }
+  .main { padding: 24px 16px 48px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .charts-2col { grid-template-columns: 1fr; }
+  .accel-strip { grid-template-columns: 1fr; }
+  .logro-banner { grid-template-columns: 1fr; padding: 28px 24px; gap: 24px; }
+  .logro-stats { flex-direction: row; justify-content: center; }
+  .site-footer { flex-direction: column; gap: 6px; text-align: center; padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <!-- Logo UDI — fiel al original: U D mayúsculas bold, i minúscula delgada, cuadrado dorado como punto -->
+    <svg class="logo-svg" viewBox="0 0 210 48" xmlns="http://www.w3.org/2000/svg" aria-label="Logo Universidad de Investigación y Desarrollo">
+      <!-- U: dos trazos verticales unidos por arco inferior -->
+      <rect x="2"  y="4" width="8" height="32" rx="1" fill="#FFFFFF"/>
+      <rect x="22" y="4" width="8" height="32" rx="1" fill="#FFFFFF"/>
+      <rect x="2"  y="30" width="28" height="8" rx="4" fill="#FFFFFF"/>
+      <!-- D: trazo vertical + semicírculo derecho -->
+      <rect x="36" y="4" width="8" height="36" rx="1" fill="#FFFFFF"/>
+      <path d="M44 4 Q68 4 68 22 Q68 40 44 40 L44 32 Q58 32 58 22 Q58 12 44 12 Z" fill="#FFFFFF"/>
+      <!-- i minúscula: trazo delgado, más bajo -->
+      <rect x="74" y="18" width="5" height="22" rx="1" fill="#FFFFFF"/>
+      <!-- cuadrado dorado: punto de la i -->
+      <rect x="74" y="8" width="8" height="8" fill="#C8892A"/>
+      <!-- separador vertical -->
+      <rect x="90" y="6" width="1" height="36" fill="rgba(255,255,255,0.25)"/>
+      <!-- texto derecho: línea 1 bold, líneas 2-3 regular -->
+      <text x="98" y="19" font-family="DM Sans,sans-serif" font-size="9" font-weight="500" fill="#FFFFFF" letter-spacing="0.8">UNIVERSIDAD</text>
+      <text x="98" y="30" font-family="DM Sans,sans-serif" font-size="8.5" font-weight="300" fill="rgba(255,255,255,0.8)" letter-spacing="0.3">DE INVESTIGACIÓN</text>
+      <text x="98" y="41" font-family="DM Sans,sans-serif" font-size="8.5" font-weight="300" fill="rgba(255,255,255,0.8)" letter-spacing="0.3">Y DESARROLLO</text>
+    </svg>
+    <div class="header-divider"></div>
+    <div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:2px;">Depto. Ciencias Básicas y Humanas</div>
+      <div style="font-size:15px;font-weight:500;color:#fff;line-height:1.25;">Resultados Saber Pro 2025 · Santander</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="badge-rank">5.° lugar regional</div>
+    <button class="print-btn" onclick="window.print()">Exportar PDF</button>
+  </div>
+</header>
+
+<nav class="nav-bar" aria-label="Secciones">
+  <button class="nav-pill active"    data-tab="t1" onclick="showTab('t1',this)"><span class="pill-num">1</span> Indicadores clave</button>
+  <button class="nav-pill"           data-tab="t2" onclick="showTab('t2',this)"><span class="pill-num">2</span> Posicionamiento</button>
+  <button class="nav-pill"           data-tab="t3" onclick="showTab('t3',this)"><span class="pill-num">3</span> Aceleración 2024–2025</button>
+  <button class="nav-pill"           data-tab="t4" onclick="showTab('t4',this)"><span class="pill-num">4</span> Crecimiento acumulado</button>
+  <button class="nav-pill"           data-tab="t5" onclick="showTab('t5',this)"><span class="pill-num">5</span> Visión integrada</button>
+  <button class="nav-pill"           data-tab="t6" onclick="showTab('t6',this)"><span class="pill-num">6</span> Evolución UDI</button>
+  <button class="nav-pill gold-pill" data-tab="t7" onclick="showTab('t7',this)"><span class="pill-num">★</span> Logro institucional</button>
+</nav>
+
+<main class="main">
+
+  <!-- T1: KPI -->
+  <div id="t1" class="tab-panel visible">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title-text">Indicadores clave · UDI 2025</div>
+        <div class="section-desc">Resumen ejecutivo del desempeño en Saber Pro frente al contexto regional y nacional.</div>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card hl">
+        <div class="kpi-label">Puntaje global 2025</div>
+        <div class="kpi-val b">149</div>
+        <div class="kpi-sub">5.° lugar en Santander · n = 574 estudiantes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Crecimiento 2024–2025</div>
+        <div class="kpi-val g">+5.51</div>
+        <div class="kpi-sub">2.° mayor crecimiento en el último año</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Crecimiento 2023–2025</div>
+        <div class="kpi-val g">+8.05</div>
+        <div class="kpi-sub">3.° mayor crecimiento acumulado regional</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Vs. promedio nacional</div>
+        <div class="kpi-val g">+1</div>
+        <div class="kpi-sub">Supera el referente país (148 pts)</div>
+      </div>
+    </div>
+    <div style="margin-top:28px;" class="insight">
+      La UDI combina <strong>tres fortalezas simultáneas</strong>: supera el promedio nacional, lidera el crecimiento reciente del grupo medio, y muestra una tendencia de aceleración sostenida. Estos tres elementos juntos constituyen el argumento central para procesos de acreditación y rendición de cuentas.
+    </div>
+  </div>
+
+  <!-- T2: POSICIONAMIENTO -->
+  <div id="t2" class="tab-panel">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title-text">¿Dónde está la UDI en Santander?</div>
+        <div class="section-desc">Ranking de puntaje global Saber Pro 2025 — nueve instituciones de la región.</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-legend">
+        <span><span class="leg-dot" style="background:var(--udi-blue)"></span>UDI</span>
+        <span><span class="leg-dot" style="background:var(--chart-blue)"></span>Otras instituciones</span>
+        <span><span class="leg-dash"></span>Promedio nacional (148)</span>
+      </div>
+      <div style="position:relative;width:100%;height:340px;">
+        <canvas id="lollipopChart" role="img" aria-label="Ranking puntaje 2025">UIS 170 · UPB 163 · UNAB 160 · USTA 152 · UDI 149 · UTS 148 · Unisangil 147 · UDES 146 · UMB 145</canvas>
+      </div>
+      <div class="insight">
+        La UDI ocupa el <strong>5.° lugar regional</strong> con 149 puntos, superando el promedio nacional. Se ubica por encima de cuatro instituciones del grupo y a solo <strong>3 puntos de USTA</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- T3: ACELERACIÓN 2024-2025 -->
+  <div id="t3" class="tab-panel">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title-text">Aceleración del crecimiento 2024–2025</div>
+        <div class="section-desc">El dato más reciente y más relevante: cuánto creció cada institución en el último año.</div>
+      </div>
+    </div>
+    <!-- UDI acceleration highlight -->
+    <div class="accel-strip">
+      <div class="accel-card">
+        <div class="accel-period">Crecimiento 2023 → 2024</div>
+        <div class="accel-val up">+2.54</div>
+        <div class="accel-note">pts · UDI</div>
+      </div>
+      <div class="accel-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);">
+        <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Aceleración</div>
+        <div style="font-family:'Playfair Display',serif;font-size:42px;color:var(--udi-blue);line-height:1;">×2.2</div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:4px;">el crecimiento se más<br>que duplicó</div>
+      </div>
+      <div class="accel-card winner">
+        <div class="accel-period">Crecimiento 2024 → 2025</div>
+        <div class="accel-val big">+5.51</div>
+        <div class="accel-note" style="color:var(--udi-blue);font-weight:500;">pts · UDI · 2.° regional</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Crecimiento 2024–2025 por institución</div>
+      <div class="chart-desc">Ordenado de mayor a menor. Dos instituciones registraron caída en el último año.</div>
+      <div class="chart-legend">
+        <span><span class="leg-sq" style="background:var(--udi-blue)"></span>UDI — 2.° lugar</span>
+        <span><span class="leg-sq" style="background:var(--chart-blue)"></span>Creció</span>
+        <span><span class="leg-sq" style="background:#BFDBFE"></span>Retrocedió</span>
+      </div>
+      <div style="position:relative;width:100%;height:310px;">
+        <canvas id="growth2425Chart" role="img" aria-label="Crecimiento 2024-2025 por institución">UTS+8.97 · UDI+5.51 · UDES+4.77 · Unisangil+4.28 · UNAB+3.33 · UMB+3.05 · UIS+1.71 · UPB-0.53 · USTA-0.73</canvas>
+      </div>
+      <div class="insight">
+        La UDI registra el <strong>segundo mayor crecimiento en 2024–2025</strong> (+5.51 pts). Esto es especialmente relevante porque dos instituciones mejor posicionadas en el ranking retrocedieron en este período, lo que reduce la brecha de forma orgánica.
+      </div>
+    </div>
+  </div>
+
+  <!-- T4: CRECIMIENTO ACUMULADO -->
+  <div id="t4" class="tab-panel">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title-text">Crecimiento acumulado 2023–2025</div>
+        <div class="section-desc">Visión de dos años: cuántos puntos ganó cada institución desde 2023.</div>
+      </div>
+    </div>
+    <div class="charts-2col">
+      <div class="chart-card">
+        <div class="chart-title">Avance de toda la región</div>
+        <div class="chart-desc">Puntaje en 2023 y en 2025 por institución. Las líneas muestran el desplazamiento.</div>
+        <div class="chart-legend">
+          <span><span class="leg-dot" style="background:var(--udi-blue)"></span>UDI</span>
+          <span><span class="leg-line" style="background:var(--chart-blue);height:3px;"></span>Creció</span>
+          <span><span class="leg-line" style="background:#D1D5DB;height:2px;"></span>Leve variación</span>
+          <span style="font-size:11px;color:var(--ink3);">● 2025 &nbsp;○ 2023</span>
+        </div>
+        <svg id="dotplot" viewBox="0 0 400 310" style="width:100%;display:block;" role="img" aria-label="Dot plot 2023 vs 2025"></svg>
+        <div class="insight">
+          El sistema regional <strong>mejoró de forma generalizada</strong>. La UDI fue una de las tres con mayor avance, consolidando una trayectoria ascendente sostenida.
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Puntos ganados 2023–2025</div>
+        <div class="chart-desc">Crecimiento acumulado total, ordenado de mayor a menor.</div>
+        <div class="chart-legend">
+          <span><span class="leg-sq" style="background:var(--udi-blue)"></span>UDI</span>
+          <span><span class="leg-sq" style="background:var(--chart-blue)"></span>Otras IES</span>
+        </div>
+        <div style="position:relative;width:100%;height:310px;">
+          <canvas id="growthChart" role="img" aria-label="Crecimiento acumulado 2023-2025">UMB+10.14 · UTS+9.0 · UDI+8.05 · UNAB+5.89 · UPB+5.10 · UDES+5.09 · USTA+4.23 · UIS+3.75 · Unisangil+3.73</canvas>
+        </div>
+        <div class="insight">
+          La UDI registra el <strong>tercer mayor crecimiento acumulado</strong> (+8.05 pts), superando a seis de las ocho instituciones comparadas, incluidas algunas con mayor puntaje base.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- T5: VISIÓN INTEGRADA -->
+  <div id="t5" class="tab-panel">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title-text">Visión integrada del sistema</div>
+        <div class="section-desc">Dos ángulos complementarios: puntaje vs. crecimiento, y distancia al promedio nacional.</div>
+      </div>
+    </div>
+    <div class="charts-2col">
+      <div class="chart-card">
+        <div class="chart-title">Puntaje vs. crecimiento acumulado</div>
+        <div class="chart-desc">Lo ideal: alto puntaje Y alto crecimiento. Cada punto es una institución.</div>
+        <div class="chart-legend">
+          <span><span class="leg-dot" style="background:var(--udi-blue)"></span>UDI</span>
+          <span><span class="leg-dot" style="background:#9CA3AF"></span>Otras IES</span>
+          <span><span class="leg-dash"></span>Nacional (148)</span>
+        </div>
+        <div style="position:relative;width:100%;height:310px;">
+          <canvas id="scatterChart" role="img" aria-label="Scatter puntaje vs crecimiento">Relación entre puntaje 2025 y crecimiento acumulado.</canvas>
+        </div>
+        <div class="insight">
+          La UDI está <strong>por encima del promedio nacional</strong> y en el grupo de mayor crecimiento — las dos dimensiones de calidad a la vez.
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Distancia al promedio nacional</div>
+        <div class="chart-desc">Diferencia de cada institución respecto a la media nacional 2025 (148 pts).</div>
+        <div class="chart-legend">
+          <span><span class="leg-sq" style="background:var(--udi-blue)"></span>UDI</span>
+          <span><span class="leg-sq" style="background:var(--chart-blue)"></span>Por encima</span>
+          <span><span class="leg-sq" style="background:#BFDBFE"></span>Por debajo</span>
+        </div>
+        <div style="position:relative;width:100%;height:310px;">
+          <canvas id="brechaChart" role="img" aria-label="Brecha vs nacional">UIS+22 · UPB+15 · UNAB+12 · USTA+4 · UDI+1 · UTS 0 · Unisangil-1 · UDES-2 · UMB-3</canvas>
+        </div>
+        <div class="insight">
+          Solo 5 de 9 instituciones igualan o superan el promedio nacional. La UDI pertenece a ese grupo con una <strong>brecha positiva de +1 punto</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- T6: EVOLUCIÓN UDI -->
+  <div id="t6" class="tab-panel">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <div class="section-title-text">Evolución histórica de la UDI</div>
+        <div class="section-desc">Trayectoria propia 2023–2024–2025. La aceleración en el último período es el dato central.</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div style="position:relative;width:100%;height:240px;">
+        <canvas id="evolChart" role="img" aria-label="Evolución UDI 2023-2025">140.95 (2023) · 143.49 (2024) · 149 (2025)</canvas>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;">
+        <div style="text-align:center;padding:18px;background:var(--bg);border-radius:8px;border:1px solid var(--line);">
+          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">2023</div>
+          <div style="font-family:'Playfair Display',serif;font-size:30px;color:var(--ink);">140.95</div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:4px;">Línea de base</div>
+        </div>
+        <div style="text-align:center;padding:18px;background:var(--bg);border-radius:8px;border:1px solid var(--line);">
+          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">2024</div>
+          <div style="font-family:'Playfair Display',serif;font-size:30px;color:var(--ink);">143.49</div>
+          <div style="font-size:12px;color:var(--green);margin-top:4px;font-weight:500;">+2.54 pts</div>
+        </div>
+        <div style="text-align:center;padding:18px;background:var(--udi-blue-l);border-radius:8px;border:1px solid #C5D5EC;">
+          <div style="font-size:11px;color:var(--udi-blue);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">2025</div>
+          <div style="font-family:'Playfair Display',serif;font-size:30px;color:var(--udi-blue);">149</div>
+          <div style="font-size:12px;color:var(--udi-blue);margin-top:4px;font-weight:500;">+5.51 pts — aceleración ↑</div>
+        </div>
+      </div>
+      <div class="insight" style="margin-top:20px;">
+        El crecimiento de la UDI <strong>se aceleró de forma significativa</strong>: pasó de +2.54 pts en el primer período a +5.51 pts en el segundo, más del doble. Esto indica que las estrategias implementadas están generando impacto creciente.
+      </div>
+    </div>
+  </div>
+
+  <!-- T7: LOGRO -->
+  <div id="t7" class="tab-panel">
+    <div class="section-header">
+      <div class="section-num gold">★</div>
+      <div>
+        <div class="section-title-text">Logro institucional</div>
+        <div class="section-desc">Síntesis para directivos, docentes y procesos de acreditación.</div>
+      </div>
+    </div>
+    <div class="logro-banner">
+      <div>
+        <div class="logro-label">Universidad de Investigación y Desarrollo · Depto. Ciencias Básicas y Humanas · 2025</div>
+        <div class="logro-heading">La UDI supera el promedio nacional<br>y lidera el crecimiento de su grupo</div>
+        <div class="logro-body">
+          Entre 2023 y 2025, la UDI incrementó su puntaje global Saber Pro de 140.95 a 149 puntos —
+          un crecimiento acumulado de 8.05 puntos que la posiciona como la tercera institución con mayor avance en Santander.
+          En el último año registró el segundo mayor crecimiento regional (+5.51 pts), más del doble que el período anterior,
+          evidenciando una aceleración sostenida. La institución superó el promedio nacional y redujo la brecha
+          frente a universidades históricamente mejor posicionadas.
+        </div>
+      </div>
+      <div class="logro-stats">
+        <div class="logro-stat">
+          <div class="logro-stat-val">+5.51</div>
+          <div class="logro-stat-lbl">pts en 2024–2025<br>2.° regional</div>
+        </div>
+        <div class="logro-divider"></div>
+        <div class="logro-stat">
+          <div class="logro-stat-val">+8.05</div>
+          <div class="logro-stat-lbl">pts acumulados<br>2023–2025</div>
+        </div>
+        <div class="logro-divider"></div>
+        <div class="logro-stat">
+          <div class="logro-stat-val">+1</div>
+          <div class="logro-stat-lbl">sobre promedio<br>nacional</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div>Fuente: ICFES Saber Pro 2023–2025 · Elaboración propia · n UDI 2025 = 574 estudiantes</div>
+  <div>Depto. Ciencias Básicas y Humanas · UDI · Bucaramanga 2025</div>
+</footer>
+
+<script>
+// ── TAB SWITCHING ─────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('visible');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // render charts lazily when tab becomes visible
+  if (id === 't2' && !chartsDone.lollipop) { buildLollipop(); chartsDone.lollipop=true; }
+  if (id === 't3' && !chartsDone.g2425)    { buildGrowth2425(); chartsDone.g2425=true; }
+  if (id === 't4' && !chartsDone.growth)   { buildDotplot(); buildGrowth(); chartsDone.growth=true; }
+  if (id === 't5' && !chartsDone.scatter)  { buildScatter(); buildBrecha(); chartsDone.scatter=true; }
+  if (id === 't6' && !chartsDone.evol)     { buildEvol(); chartsDone.evol=true; }
+}
+const chartsDone = {};
+
+// ── DATA ─────────────────────────────────────────
+const DATA = [
+  { k:'UIS',       name:'Univ. Industrial de Santander',      p23:166.25, p24:168.0,  p25:170, crec:3.75,  c2425:1.71,   brec:22  },
+  { k:'UPB',       name:'Univ. Pontificia Bolivariana',        p23:157.90, p24:163.5,  p25:163, crec:5.10,  c2425:-0.528, brec:15  },
+  { k:'UNAB',      name:'Univ. Autónoma de Bucaramanga',       p23:154.11, p24:157.4,  p25:160, crec:5.89,  c2425:3.33,   brec:12  },
+  { k:'USTA',      name:'Univ. Santo Tomás',                   p23:147.77, p24:152.7,  p25:152, crec:4.23,  c2425:-0.733, brec:4   },
+  { k:'UDI',       name:'Universidad de Investigación y Des.', p23:140.95, p24:143.49, p25:149, crec:8.05,  c2425:5.51,   brec:1   },
+  { k:'UTS',       name:'Unidades Tecnológicas de Santander',  p23:139.0,  p24:139.0,  p25:148, crec:9.00,  c2425:8.97,   brec:0   },
+  { k:'Unisangil', name:'Fundación Universitaria de San Gil',  p23:143.27, p24:143.1,  p25:147, crec:3.73,  c2425:4.28,   brec:-1  },
+  { k:'UDES',      name:'Univ. de Santander',                  p23:140.91, p24:140.9,  p25:146, crec:5.09,  c2425:4.77,   brec:-2  },
+  { k:'UMB',       name:'Univ. Manuela Beltrán',               p23:134.86, p24:141.95, p25:145, crec:10.14, c2425:3.05,   brec:-3  }
+];
+const NAT   = 148;
+const CU    = '#1B4F8C';
+const CGOLD = '#C8892A';
+const CBL   = '#5B9BD5';
+const CBL2  = '#1B4F8C';
+const CBLL  = '#BFDBFE';
+const CGR   = '#D1D5DB';
+const CGR2  = '#9CA3AF';
+const CGRN  = '#0F6E56';
+const CGRID = 'rgba(0,0,0,0.05)';
+const CTXT  = '#888780';
+const CINK  = '#1A1917';
+const TIP   = { backgroundColor:'#1A1917', titleColor:'#fff', bodyColor:'#D1D5DB', padding:10, cornerRadius:6, displayColors:false };
+
+// ── LOLLIPOP ─────────────────────────────────────
+function buildLollipop() {
+  const s = [...DATA].sort((a,b) => a.p25 - b.p25);
+  new Chart(document.getElementById('lollipopChart'), {
+    type:'bar',
+    data:{ labels:s.map(d=>d.k), datasets:[{ data:s.map(d=>d.p25),
+      backgroundColor:s.map(d=>d.k==='UDI'?CU:CBL), borderWidth:0, borderRadius:3, barThickness:6 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{
+        title:c=>DATA.find(d=>d.k===c[0].label)?.name||c[0].label,
+        label:c=>`Puntaje 2025: ${c.parsed.x} pts` }}},
+      scales:{ x:{min:130,max:175,grid:{color:CGRID},ticks:{color:CTXT,font:{size:12,family:'DM Sans'}}},
+               y:{grid:{display:false},ticks:{color:c=>c.tick.label==='UDI'?CU:CINK,
+                 font:c=>({size:12,family:'DM Sans',weight:c.tick.label==='UDI'?'500':'400'})}} }},
+    plugins:[{afterDraw(chart){
+      const {ctx:c,chartArea:{top,bottom},scales:{x}}=chart;
+      const xp=x.getPixelForValue(NAT);
+      c.save(); c.setLineDash([5,4]); c.strokeStyle=CTXT; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(xp,top); c.lineTo(xp,bottom); c.stroke();
+      c.font='11px DM Sans'; c.fillStyle=CTXT; c.textAlign='center';
+      c.fillText('Nac. 148',xp,top-5); c.restore();
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const isU=chart.data.labels[i]==='UDI';
+        c.save(); c.beginPath(); c.arc(bar.x,bar.y,isU?7:5,0,Math.PI*2);
+        c.fillStyle=isU?CU:CBL2; c.fill();
+        c.font=`${isU?'500':'400'} ${isU?12:11}px DM Sans`;
+        c.fillStyle=isU?CU:CINK; c.textAlign='left';
+        c.fillText(chart.data.datasets[0].data[i],bar.x+11,bar.y+4); c.restore();
+      });
+    }}]
+  });
+}
+
+// ── GROWTH 2424→2425 ─────────────────────────────
+function buildGrowth2425() {
+  const s=[...DATA].sort((a,b)=>b.c2425-a.c2425);
+  new Chart(document.getElementById('growth2425Chart'),{
+    type:'bar',
+    data:{ labels:s.map(d=>d.k), datasets:[{ data:s.map(d=>d.c2425),
+      backgroundColor:s.map(d=>d.k==='UDI'?CU:d.c2425>=0?CBL:CBLL),
+      borderWidth:0, borderRadius:4, barThickness:20 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{
+        title:c=>DATA.find(d=>d.k===c[0].label)?.name||c[0].label,
+        label:c=>{const v=c.parsed.x; return `Crecimiento 2024–25: ${v>=0?'+':''}${v.toFixed(2)} pts`;} }}},
+      scales:{ x:{ min:-2, max:11, grid:{color:CGRID},
+          ticks:{color:CTXT,font:{size:11,family:'DM Sans'},callback:v=>v>=0?'+'+v:v} },
+        y:{ grid:{display:false}, ticks:{color:c=>c.tick.label==='UDI'?CU:CINK,
+          font:c=>({size:12,family:'DM Sans',weight:c.tick.label==='UDI'?'500':'400'})}} }},
+    plugins:[{afterDraw(chart){
+      const {ctx:c,chartArea:{top,bottom},scales:{x}}=chart;
+      const xp=x.getPixelForValue(0);
+      c.save(); c.strokeStyle='#888780'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(xp,top); c.lineTo(xp,bottom); c.stroke(); c.restore();
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const val=chart.data.datasets[0].data[i];
+        const isU=chart.data.labels[i]==='UDI';
+        c.save(); c.font=`${isU?'500':'400'} ${isU?12:11}px DM Sans`;
+        c.fillStyle=isU?CU:val>=0?'#4A4845':'#9CA3AF';
+        c.textAlign=val>=0?'left':'right';
+        c.fillText((val>=0?'+':'')+val.toFixed(2),bar.x+(val>=0?6:-6),bar.y+4); c.restore();
+      });
+    }}]
+  });
+}
+
+// ── DOT PLOT ─────────────────────────────────────
+function buildDotplot() {
+  const svg=document.getElementById('dotplot');
+  const VW=400,VH=310,PAD={l:72,r:52,t:28,b:24};
+  const s=[...DATA].sort((a,b)=>b.p25-a.p25);
+  const rowH=(VH-PAD.t-PAD.b)/s.length;
+  const minV=130,maxV=174;
+  const x23=PAD.l+(VW-PAD.l-PAD.r)*0.18;
+  const x25=PAD.l+(VW-PAD.l-PAD.r)*0.78;
+  function el(tag,attrs,par){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag); for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v); if(par)par.appendChild(e); return e; }
+  el('text',{x:x23,y:17,'text-anchor':'middle','font-size':'11','font-weight':'500',fill:CTXT,'font-family':'DM Sans'},svg).textContent='2023';
+  el('text',{x:x25,y:17,'text-anchor':'middle','font-size':'11','font-weight':'500',fill:CINK,'font-family':'DM Sans'},svg).textContent='2025';
+  el('line',{x1:x23,y1:PAD.t-2,x2:x23,y2:VH-PAD.b+4,stroke:'#E8E6E1','stroke-width':'0.8'},svg);
+  el('line',{x1:x25,y1:PAD.t-2,x2:x25,y2:VH-PAD.b+4,stroke:'#E8E6E1','stroke-width':'0.8'},svg);
+  s.forEach((d,i)=>{
+    const isU=d.k==='UDI', cy=PAD.t+rowH*i+rowH/2;
+    const rX=x25-x23, norm=v=>x23+rX*(v-minV)/(maxV-minV);
+    const cx23=norm(d.p23), cx25=norm(d.p25), grew=d.p25>=d.p23;
+    const lc=isU?CU:grew?CBL:'#D1D5DB';
+    el('line',{x1:cx23,y1:cy,x2:cx25,y2:cy,stroke:lc,'stroke-width':isU?'3':'1.5','stroke-linecap':'round'},svg);
+    el('circle',{cx:cx23,cy,r:isU?5:3.5,fill:'white',stroke:lc,'stroke-width':isU?'2':'1.2'},svg);
+    el('circle',{cx:cx25,cy,r:isU?6:4,fill:isU?CU:grew?CBL2:'#9CA3AF'},svg);
+    el('text',{x:PAD.l-6,y:cy+4,'text-anchor':'end','font-size':isU?'12':'11','font-weight':isU?'500':'400',fill:isU?CU:CINK,'font-family':'DM Sans'},svg).textContent=d.k;
+    el('text',{x:cx25+(isU?10:8),y:cy+4,'font-size':isU?'11':'10','font-weight':isU?'500':'400',fill:isU?CU:'#4A4845','font-family':'DM Sans'},svg).textContent=d.p25;
+    if(isU||d.crec>=8) el('text',{x:VW-PAD.r+4,y:cy+4,'font-size':'10','font-weight':isU?'500':'400',fill:isU?CU:CBL,'font-family':'DM Sans'},svg).textContent='+'+(d.p25-d.p23).toFixed(1);
+  });
+}
+
+// ── GROWTH ACUM ───────────────────────────────────
+function buildGrowth() {
+  const s=[...DATA].sort((a,b)=>b.crec-a.crec);
+  new Chart(document.getElementById('growthChart'),{
+    type:'bar',
+    data:{ labels:s.map(d=>d.k), datasets:[{ data:s.map(d=>d.crec),
+      backgroundColor:s.map(d=>d.k==='UDI'?CU:CBL), borderWidth:0, borderRadius:4, barThickness:18 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{
+        title:c=>DATA.find(d=>d.k===c[0].label)?.name||c[0].label,
+        label:c=>`Crecimiento: +${c.parsed.x.toFixed(2)} pts` }}},
+      scales:{ x:{min:0,max:12,grid:{color:CGRID},ticks:{color:CTXT,font:{size:11,family:'DM Sans'},callback:v=>'+'+v}},
+        y:{grid:{display:false},ticks:{color:c=>c.tick.label==='UDI'?CU:CINK,font:c=>({size:12,family:'DM Sans',weight:c.tick.label==='UDI'?'500':'400'})}} }},
+    plugins:[{afterDraw(chart){
+      const {ctx:c}=chart;
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const val=chart.data.datasets[0].data[i],isU=chart.data.labels[i]==='UDI';
+        c.save(); c.font=`${isU?'500':'400'} ${isU?12:11}px DM Sans`;
+        c.fillStyle=isU?CU:CTXT; c.textAlign='left';
+        c.fillText('+'+val.toFixed(2),bar.x+6,bar.y+4); c.restore();
+      });
+    }}]
+  });
+}
+
+// ── SCATTER ───────────────────────────────────────
+function buildScatter() {
+  const other=DATA.filter(d=>d.k!=='UDI'), udi=DATA.find(d=>d.k==='UDI');
+  new Chart(document.getElementById('scatterChart'),{
+    type:'scatter',
+    data:{ datasets:[
+      { label:'Otras IES', data:other.map(d=>({x:d.p25,y:d.crec,label:d.k})), backgroundColor:CGR2, pointRadius:7, pointHoverRadius:9 },
+      { label:'UDI', data:[{x:udi.p25,y:udi.crec,label:'UDI'}], backgroundColor:CU, pointRadius:10, pointHoverRadius:12 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{right:20,top:20}},
+      plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{
+        title:c=>{const d=DATA.find(dd=>dd.p25===c[0].parsed.x); return d?d.name:'';},
+        label:c=>[`Puntaje 2025: ${c.parsed.x}`,`Crecimiento: +${c.parsed.y.toFixed(2)} pts`] }}},
+      scales:{ x:{min:128,max:178,title:{display:true,text:'Puntaje 2025',color:CTXT,font:{size:11,family:'DM Sans'}},grid:{color:CGRID},ticks:{color:CTXT,font:{size:11,family:'DM Sans'}}},
+        y:{min:-1,max:12,title:{display:true,text:'Crecimiento 2023–2025',color:CTXT,font:{size:11,family:'DM Sans'}},grid:{color:CGRID},ticks:{color:CTXT,font:{size:11,family:'DM Sans'},callback:v=>v>=0?'+'+v:v}} }},
+    plugins:[{afterDraw(chart){
+      const {ctx:c,chartArea:{top,bottom},scales:{x}}=chart;
+      const xp=x.getPixelForValue(NAT);
+      c.save(); c.setLineDash([5,4]); c.strokeStyle=CTXT; c.lineWidth=1.2;
+      c.beginPath(); c.moveTo(xp,top); c.lineTo(xp,bottom); c.stroke();
+      c.font='10px DM Sans'; c.fillStyle=CTXT; c.textAlign='center';
+      c.fillText('Nac. 148',xp,top-4); c.restore();
+      chart.data.datasets.forEach((ds,dsi)=>{
+        chart.getDatasetMeta(dsi).data.forEach((pt,i)=>{
+          const d=ds.data[i],isU=d.label==='UDI';
+          c.save(); c.font=`${isU?'500':'400'} 10px DM Sans`;
+          c.fillStyle=isU?CU:'#6B7280'; c.textAlign='left';
+          c.fillText(d.label,pt.x+10,pt.y+4); c.restore();
+        });
+      });
+    }}]
+  });
+}
+
+// ── BRECHA ────────────────────────────────────────
+function buildBrecha() {
+  const s=[...DATA].sort((a,b)=>b.brec-a.brec);
+  new Chart(document.getElementById('brechaChart'),{
+    type:'bar',
+    data:{ labels:s.map(d=>d.k), datasets:[{ data:s.map(d=>d.brec),
+      backgroundColor:s.map(d=>d.k==='UDI'?CU:d.brec>=0?CBL:CBLL), borderWidth:0, borderRadius:4, barThickness:18 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{
+        title:c=>DATA.find(d=>d.k===c[0].label)?.name||c[0].label,
+        label:c=>{const v=c.parsed.x; return `Brecha: ${v>=0?'+':''}${v} pts vs. nacional`;} }}},
+      scales:{ x:{min:-6,max:26,grid:{color:CGRID},ticks:{color:CTXT,font:{size:11,family:'DM Sans'},callback:v=>v>=0?'+'+v:v}},
+        y:{grid:{display:false},ticks:{color:c=>c.tick.label==='UDI'?CU:CINK,font:c=>({size:12,family:'DM Sans',weight:c.tick.label==='UDI'?'500':'400'})}} }},
+    plugins:[{afterDraw(chart){
+      const {ctx:c,chartArea:{top,bottom},scales:{x}}=chart;
+      const xp=x.getPixelForValue(0);
+      c.save(); c.strokeStyle='#888780'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(xp,top); c.lineTo(xp,bottom); c.stroke(); c.restore();
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const val=chart.data.datasets[0].data[i],isU=chart.data.labels[i]==='UDI';
+        c.save(); c.font=`${isU?'500':'400'} ${isU?12:11}px DM Sans`;
+        c.fillStyle=isU?CU:'#6B7280'; c.textAlign=val>=0?'left':'right';
+        c.fillText((val>=0?'+':'')+val,bar.x+(val>=0?6:-6),bar.y+4); c.restore();
+      });
+    }}]
+  });
+}
+
+// ── EVOLUCIÓN ─────────────────────────────────────
+function buildEvol() {
+  new Chart(document.getElementById('evolChart'),{
+    type:'line',
+    data:{ labels:['2023','2024','2025'], datasets:[{ label:'UDI', data:[140.95,143.49,149],
+      borderColor:CU, backgroundColor:'rgba(27,79,140,0.06)', borderWidth:3,
+      pointBackgroundColor:CU, pointRadius:6, pointHoverRadius:8, fill:true, tension:0.3 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...TIP, callbacks:{label:c=>`UDI: ${c.parsed.y.toFixed(2)} pts`}} },
+      scales:{ x:{grid:{display:false},ticks:{color:CTXT,font:{size:13,family:'DM Sans',weight:'500'}}},
+        y:{min:136,max:153,grid:{color:CGRID},ticks:{color:CTXT,font:{size:11,family:'DM Sans'}}} }},
+    plugins:[{afterDraw(chart){
+      const {ctx:c,scales:{x,y}}=chart;
+      [{yr:'2024',v:143.49,d:'+2.54'},{yr:'2025',v:149,d:'+5.51 ↑'}].forEach(p=>{
+        const cx=x.getPixelForValue(p.yr),cy=y.getPixelForValue(p.v);
+        c.save(); c.font='500 12px DM Sans';
+        c.fillStyle=p.yr==='2025'?CU:CGRN; c.textAlign='center';
+        c.fillText(p.d,cx,cy-14); c.restore();
+      });
+    }}]
+  });
+}
+</script>
+</body>
+</html>
